@@ -1,5 +1,5 @@
-import Hero from '@/components/Hero'
-import FeatureGrid from '@/components/FeatureGrid'
+import Hero from '@/components/sections/Hero'
+import FeatureGrid from '@/components/sections/FeatureGrid'
 
 export default function HomePage() {
   return (
