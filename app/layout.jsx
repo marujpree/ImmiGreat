@@ -1,27 +1,22 @@
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
 
 export const metadata = {
   title: {
-    default: 'CitizenReady',
-    template: '%s | CitizenReady',
+    default: 'ImmiGreat',
+    template: '%s | ImmiGreat',
   },
-  description:
-    'Prepare for the US citizenship test and find resources for settling in the USA.',
+  description: 'Comprehensive resources, personalized guidance, and expert support to help you navigate the U.S. immigration process.',
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col min-h-screen">
         <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-500">
-          <p>
-            &copy; {new Date().getFullYear()} CitizenReady. Not affiliated with
-            USCIS.
-          </p>
-        </footer>
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   )
