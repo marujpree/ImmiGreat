@@ -81,20 +81,18 @@ export default function AppNavbar() {
       {/* ── Desktop: 3-section bar ── */}
       <div className="hidden lg:flex items-center w-full px-6" style={{ height: 120 }}>
 
-        {/* LEFT — logo + brand text (edit each independently) */}
-        <div className="flex items-center" style={{ width: 300 }}>
-          {/* Logo image — adjust width/height to resize */}
+        {/* LEFT — logo + brand text */}
+        <div className="flex items-center gap-2 shrink-0">
           <Link href="/" className="shrink-0">
             <img
               src="/logo.svg"
               alt="ImmiGreat logo"
-              width={160}
-              height={160}
+              width={80}
+              height={80}
               style={{ objectFit: 'contain', display: 'block' }}
             />
           </Link>
-          {/* Brand text — adjust marginLeft to shift position */}
-          <Link href="/" className="text-4xl font-semibold text-white tracking-tight" style={{ marginLeft: 170}}>
+          <Link href="/" className="text-3xl font-semibold text-white tracking-tight whitespace-nowrap">
             ImmiGreat
           </Link>
         </div>
@@ -122,7 +120,7 @@ export default function AppNavbar() {
         </nav>
 
         {/* RIGHT — language + account */}
-        <div className="flex items-center gap-3" style={{ width: 200, justifyContent: 'flex-end', paddingRight: 200 }}>
+        <div className="flex items-center gap-3 shrink-0 justify-end">
 
           {/* Language picker */}
           <div className="relative">
