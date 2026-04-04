@@ -10,12 +10,11 @@ const NAV_BG = '#1e3a5f'
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/features', label: 'Features' },
+  { href: '/learn', label: 'Learn' },
   { href: '/visa-info', label: 'Visa Information' },
   { href: '/form-guides', label: 'Form Guides' },
   { href: '/resources', label: 'Resources' },
   { href: '/local-help', label: 'Local Help' },
-  { href: '/learn', label: 'Learn' },
   { href: '/about', label: 'About' },
 ]
 

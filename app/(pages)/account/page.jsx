@@ -121,7 +121,7 @@ export default function AccountPage() {
   return (
     <div>
       <PageBanner
-        imageUrl="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"
+        imageUrl="https://www.americanflags.com/media/opti_image/webp/magefan_blog/American_Flag.webp"
         title="Profile Settings"
         description="Manage your account information and test preferences"
       />

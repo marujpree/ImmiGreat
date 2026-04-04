@@ -4,7 +4,6 @@ import { ArrowRight, CheckCircle, FileText, BookOpen, Map, Globe, Scale, Graduat
 export const metadata = { title: 'Home' }
 
 const features = [
-  { icon: CheckCircle, title: 'Personalized Pathway', description: 'Step-by-step guidance customized for your immigration journey', link: '/features' },
   { icon: FileText, title: 'Form Assistance', description: 'Complete immigration forms with detailed, field-by-field guidance', link: '/form-guides' },
   { icon: Globe, title: 'Visa Information', description: 'Comprehensive information on U.S. visa categories and requirements', link: '/visa-info' },
   { icon: Scale, title: 'Legal Resources', description: 'Access immigration resources and understand your rights', link: '/resources' },
