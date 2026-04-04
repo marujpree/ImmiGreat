@@ -78,20 +78,20 @@ export default function AppNavbar() {
       style={{ backgroundColor: NAV_BG, borderBottom: '1px solid rgba(255,255,255,0.2)' }}
     >
       {/* ── Desktop: 3-section bar ── */}
-      <div className="hidden lg:flex items-center w-full px-6" style={{ height: 120 }}>
+      <div className="hidden lg:flex items-center w-full px-8" style={{ height: 90 }}>
 
         {/* LEFT — logo + brand text */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-4 shrink-0">
           <Link href="/" className="shrink-0">
             <img
               src="/logo.svg"
               alt="ImmiGreat logo"
-              width={80}
-              height={80}
+              width={128}
+              height={128}
               style={{ objectFit: 'contain', display: 'block' }}
             />
           </Link>
-          <Link href="/" className="text-3xl font-semibold text-white tracking-tight whitespace-nowrap">
+          <Link href="/" className="text-4xl font-bold text-white tracking-tight whitespace-nowrap">
             ImmiGreat
           </Link>
         </div>

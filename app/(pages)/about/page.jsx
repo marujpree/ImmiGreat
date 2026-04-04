@@ -6,7 +6,7 @@ export const metadata = { title: 'About' }
 const team = [
   { name: 'Community Partners', description: 'Immigration lawyers, social workers, and educators who guide our content development' },
   { name: 'Technology Team', description: 'Engineers and designers committed to building accessible, user-friendly tools' },
-  { name: 'Translators', description: 'Professional translators ensuring accuracy across 25+ languages' },
+  { name: 'Translators', description: 'Professional translators ensuring accuracy across 5 languages' },
   { name: 'Community Advisors', description: "Immigrants who've navigated the system and provide real-world feedback" },
 ]
 
@@ -60,7 +60,7 @@ export default function AboutPage() {
                 {[
                   { title: 'The Challenge', body: 'Every year, millions of people come to the United States seeking better opportunities, safety, or to reunite with family. They face complex forms, unfamiliar systems, and information that\'s often difficult to understand—especially in a new language.' },
                   { title: 'Our Solution', body: 'ImmiGreat breaks down these barriers by providing step-by-step guidance, plain-language explanations, multilingual support, and connections to local help—all in one free platform.' },
-                  { title: 'The Impact', body: "Since our launch, we've helped over 50,000 people navigate their immigration journey with greater confidence and clarity." },
+                  { title: 'The Impact', body: "ImmiGreat offers 20+ learning exercises to help you navigate your immigration journey with greater confidence and clarity." },
                 ].map((item) => (
                   <div key={item.title}>
                     <h3 className="text-xl mb-2 font-medium">{item.title}</h3>

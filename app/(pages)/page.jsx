@@ -12,8 +12,8 @@ const features = [
 ]
 
 const impactStats = [
-  { number: '50,000+', label: 'People Helped' },
-  { number: '25+', label: 'Languages Supported' },
+  { number: '20+', label: 'Learning Exercises Available' },
+  { number: '5', label: 'Languages Supported' },
   { number: '100+', label: 'Form Guides Available' },
 ]
 
@@ -66,12 +66,6 @@ export default function HomePage() {
       {/* Features grid */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl mb-4 text-foreground font-medium">Comprehensive Immigration Resources</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Everything you need to successfully navigate your immigration journey in one place
-            </p>
-          </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, idx) => {
               const Icon = feature.icon
@@ -106,7 +100,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 {[
                   { title: 'Expert Guidance', desc: 'Developed in partnership with immigration lawyers and legal experts' },
-                  { title: 'Multilingual Support', desc: 'Access resources in 25+ languages with professional translations' },
+                  { title: 'Multilingual Support', desc: 'Access resources in 5 languages with professional translations' },
                   { title: 'Personalized Experience', desc: 'Create an account for customized guidance tailored to your situation' },
                   { title: 'Always Free', desc: '100% free resources—no hidden fees, no subscriptions required' },
                 ].map((item) => (
