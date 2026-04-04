@@ -8,6 +8,37 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // ImmiGreat design system colors
+        primary: {
+          DEFAULT: '#1e3a5f',
+          foreground: '#ffffff',
+        },
+        secondary: {
+          DEFAULT: '#8b1538',
+          foreground: '#ffffff',
+        },
+        muted: {
+          DEFAULT: '#f5f5f5',
+          foreground: '#6b7280',
+        },
+        accent: {
+          DEFAULT: '#e5e7eb',
+          foreground: '#1a1a1a',
+        },
+        background: '#ffffff',
+        foreground: '#1a1a1a',
+        border: '#d1d5db',
+        'input-background': '#ffffff',
+        destructive: {
+          DEFAULT: '#dc2626',
+          foreground: '#ffffff',
+        },
+        card: {
+          DEFAULT: '#ffffff',
+          foreground: '#1a1a1a',
+        },
+        ring: '#1e3a5f',
+        // Legacy brand colors
         brand: {
           50:  '#eff6ff',
           100: '#dbeafe',
