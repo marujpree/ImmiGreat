@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { Mail } from 'lucide-react'
 
 const quickLinks = [
-  { href: '/features', label: 'Features' },
   { href: '/visa-info', label: 'Visa Information' },
   { href: '/form-guides', label: 'Form Guides' },
   { href: '/learn', label: 'Learn & Prepare' },
