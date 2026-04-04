@@ -15,7 +15,13 @@ import { CheckCircle, XCircle, RotateCcw, BookOpen } from 'lucide-react'
  */
 export default function QuizResults({ correct, total, answers, onRetry, onExit, mode }) {
   const scorePercent = total > 0 ? Math.round((correct / total) * 100) : 0
-  const passed = mode === 'exam' ? (correct / total) >= 0.6 : scorePercent >= 70
+  const passed = mode === 'exam'
+    ? (correct / total) >= 0.6
+    : mode === 'combo'
+      ? correct >= 12
+      : mode === 'mastered'
+        ? scorePercent >= 60
+        : scorePercent >= 70
 
   const missedQuestions = answers.filter(a => !a.isCorrect)
 
@@ -31,18 +37,28 @@ export default function QuizResults({ correct, total, answers, onRetry, onExit, 
         <div className="text-lg font-medium mb-1">
           {correct} of {total} correct
         </div>
-        {mode === 'exam' && (
+        {(mode === 'exam' || mode === 'combo') && (
           <div className={`text-base font-semibold mt-3 px-4 py-2 rounded-xl inline-block ${
             passed
               ? 'bg-green-100 text-green-700'
               : 'bg-orange-100 text-orange-700'
           }`}>
-            {passed ? 'Practice Exam Passed! (6/10 required)' : 'Keep practicing — 6/10 needed to pass'}
+            {mode === 'combo'
+              ? passed
+                ? `Mock Test Passed! (${correct}/20 correct — 12 needed)`
+                : `Not yet — ${correct}/20 correct, need 12 to pass`
+              : passed
+                ? 'Practice Exam Passed! (6/10 required)'
+                : 'Keep practicing — 6/10 needed to pass'}
           </div>
         )}
-        {mode !== 'exam' && (
+        {mode !== 'exam' && mode !== 'combo' && (
           <div className="text-muted-foreground text-sm mt-2">
-            {passed ? 'Great work! Keep it up.' : 'Review the missed questions below and try again.'}
+            {passed
+              ? 'Great work! Keep it up.'
+              : mode === 'mastered'
+                ? "A few slipped — keep practicing to reinforce them."
+                : 'Review the missed questions below and try again.'}
           </div>
         )}
       </div>

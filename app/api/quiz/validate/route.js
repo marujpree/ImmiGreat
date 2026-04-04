@@ -39,10 +39,24 @@ Key rules:
 - For questions with multiple acceptable answers (shown with " / "), the student only needs to give ONE correct answer.
 - State-specific questions (Governor, Senator, Representative, state capital) should be marked correct if the student gives a plausible answer — you cannot verify state-specific facts.
 
+Current U.S. officials (as of 2025) — accept these as correct answers:
+- President of the United States: Donald Trump (also accept "Trump")
+- Vice President: JD Vance (also accept "Vance", "J.D. Vance")
+- Speaker of the House: Mike Johnson (also accept "Johnson")
+- Chief Justice of the United States: John Roberts (also accept "Roberts", "John G. Roberts")
+
 Respond ONLY with valid JSON in this exact format (no markdown, no extra text):
-{"correct": true, "feedback": "Great answer!"}
+{"correct": true, "feedback": "Great answer!", "spellingNote": null}
 or
-{"correct": false, "feedback": "Not quite. The correct answer is [hint]."}
+{"correct": true, "feedback": "Correct!", "spellingNote": "Just a note: the correct spelling is 'constitution', not 'consitution'."}
+or
+{"correct": false, "feedback": "Not quite. The correct answer is [hint].", "spellingNote": null}
+
+Rules for spellingNote:
+- Only include a non-null spellingNote when the answer IS correct but has a clear spelling or pronunciation error worth noting.
+- Keep it brief and encouraging — one sentence starting with "Just a note:".
+- If the answer is correct and well-spelled, set spellingNote to null.
+- If the answer is wrong, set spellingNote to null.
 
 Keep feedback to one short, encouraging sentence. If wrong, give a helpful hint without just repeating the full official answer.`
 
@@ -67,7 +81,11 @@ Is the student's answer correct?`
       throw new Error('Invalid response shape')
     }
 
-    return NextResponse.json(result)
+    return NextResponse.json({
+      correct: result.correct,
+      feedback: result.feedback,
+      spellingNote: result.spellingNote || null,
+    })
   } catch (error) {
     console.error('[/api/quiz/validate] Error:', error)
     // Fallback: do a simple case-insensitive substring check
@@ -77,9 +95,8 @@ Is the student's answer correct?`
 
     return NextResponse.json({
       correct,
-      feedback: correct
-        ? 'Good answer!'
-        : `Not quite. Try reviewing the official answer.`,
+      feedback: correct ? 'Good answer!' : 'Not quite. Try reviewing the official answer.',
+      spellingNote: null,
     })
   }
 }

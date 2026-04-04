@@ -31,9 +31,18 @@ export async function POST(request) {
 
   const { mode = 'practice', category } = body
 
-  if (!['practice', 'exam', 'review'].includes(mode)) {
+  if (!['practice', 'exam', 'review', 'mastered', 'combo'].includes(mode)) {
     return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
   }
+
+  // Fetch user's question bank preference (legacy=100 questions, 2025=128 questions)
+  const { data: userSettings } = await supabase
+    .from('user_settings')
+    .select('question_bank')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const isLegacy = userSettings?.question_bank === 'legacy'
 
   let questions = []
 
@@ -55,12 +64,69 @@ export async function POST(request) {
       .map(c => c.civics_questions)
       .filter(Boolean)
 
-  } else if (mode === 'exam') {
-    // 10 random questions, prefer lower mastery
-    const { data: all, error } = await supabase
+  } else if (mode === 'mastered') {
+    // Fetch questions the user has already mastered: mastery_score >= 0.75 AND times_correct >= 3
+    const { data: masteredProgress, error: masteredError } = await supabase
+      .from('user_question_progress')
+      .select('question_id')
+      .eq('user_id', user.id)
+      .gte('mastery_score', 0.75)
+      .gte('times_correct', 3)
+
+    if (masteredError) {
+      console.error('[/api/quiz/start] Mastered query error:', masteredError)
+      return NextResponse.json({ error: 'Failed to load mastered questions' }, { status: 500 })
+    }
+
+    const masteredIds = (masteredProgress || []).map(p => p.question_id)
+
+    if (masteredIds.length === 0) {
+      return NextResponse.json(
+        { error: 'No mastered questions yet. Keep practicing to master your first questions!' },
+        { status: 404 }
+      )
+    }
+
+    let masteredQuery = supabase
+      .from('civics_questions')
+      .select('id, question_text, official_answer, category')
+      .in('id', masteredIds)
+      .eq('is_active', true)
+    if (isLegacy) masteredQuery = masteredQuery.eq('is_2025_addition', false)
+    const { data: masteredQs, error: qError } = await masteredQuery.limit(20)
+
+    if (qError) {
+      console.error('[/api/quiz/start] Mastered questions fetch error:', qError)
+      return NextResponse.json({ error: 'Failed to load mastered questions' }, { status: 500 })
+    }
+
+    questions = (masteredQs || []).sort(() => Math.random() - 0.5)
+
+  } else if (mode === 'combo') {
+    // Full mock test: 20 random questions from all categories.
+    // Quiz ends in the client when 12 correct answers are reached (2025 standard: 12/20).
+    let comboQuery = supabase
       .from('civics_questions')
       .select('id, question_text, official_answer, category')
       .eq('is_active', true)
+    if (isLegacy) comboQuery = comboQuery.eq('is_2025_addition', false)
+    const { data: all, error: comboError } = await comboQuery
+
+    if (comboError) {
+      console.error('[/api/quiz/start] Combo query error:', comboError)
+      return NextResponse.json({ error: 'Failed to load questions' }, { status: 500 })
+    }
+
+    questions = (all || []).sort(() => Math.random() - 0.5).slice(0, 20)
+
+  } else if (mode === 'exam') {
+    // 10 random questions, prefer lower mastery
+    let examQuery = supabase
+      .from('civics_questions')
+      .select('id, question_text, official_answer, category')
+      .eq('is_active', true)
+    if (isLegacy) examQuery = examQuery.eq('is_2025_addition', false)
+    const { data: all, error } = await examQuery
 
     if (error) {
       console.error('[/api/quiz/start] Questions query error:', error)
@@ -96,18 +162,17 @@ export async function POST(request) {
       .select('id, question_text, official_answer, category')
       .eq('is_active', true)
 
-    if (category) {
-      query = query.eq('category', category)
-    }
+    if (isLegacy) query = query.eq('is_2025_addition', false)
+    if (category) query = query.eq('category', category)
 
-    const { data, error } = await query.limit(10)
+    const { data, error } = await query
 
     if (error) {
       console.error('[/api/quiz/start] Questions query error:', error)
       return NextResponse.json({ error: 'Failed to load questions' }, { status: 500 })
     }
 
-    questions = data || []
+    questions = (data || []).sort(() => Math.random() - 0.5).slice(0, 10)
   }
 
   if (questions.length === 0) {

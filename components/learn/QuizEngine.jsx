@@ -1,35 +1,34 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 import QuizQuestion from './QuizQuestion'
 import QuizFeedback from './QuizFeedback'
 import QuizResults from './QuizResults'
 
-/**
- * Orchestrates a full quiz session.
- * State machine: idle → loading → question → validating → feedback → (next question | complete)
- *
- * Props:
- *   mode       {'practice'|'exam'|'review'}
- *   category   {string|null}   - topic filter (practice mode only)
- *   onExit     {() => void}    - called when user exits back to topic list
- */
+const COMBO_PASS_THRESHOLD = 12  // 2025 standard: 12/20 correct to pass
+
+const MODE_LABELS = {
+  practice: 'Practice',
+  exam: 'Practice Exam',
+  review: 'Review',
+  mastered: 'Passed Questions',
+  combo: 'Full Mock Test',
+}
+
 export default function QuizEngine({ mode, category, onExit }) {
-  const [phase, setPhase] = useState('loading')  // 'loading' | 'question' | 'validating' | 'feedback' | 'complete' | 'error'
+  const [phase, setPhase] = useState('loading')
   const [error, setError] = useState(null)
 
   const [attemptId, setAttemptId] = useState(null)
   const [questions, setQuestions] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  // Per-question state
   const [currentAnswer, setCurrentAnswer] = useState('')
   const [currentInputMode, setCurrentInputMode] = useState('typed')
-  const [feedback, setFeedback] = useState(null)  // { isCorrect, feedback, officialAnswer }
+  const [feedback, setFeedback] = useState(null)
   const [answerStartTime, setAnswerStartTime] = useState(null)
 
-  // Accumulated results for the results screen
   const [answers, setAnswers] = useState([])
 
   const startQuiz = useCallback(async () => {
@@ -85,9 +84,12 @@ export default function QuizEngine({ mode, category, onExit }) {
       const result = await res.json()
       if (!res.ok) throw new Error(result.error || 'Validation failed')
 
-      const isFinal = currentIndex === questions.length - 1
+      // Calculate if this is the final answer
+      const updatedCorrect = answers.filter(a => a.isCorrect).length + (result.correct ? 1 : 0)
+      const isComboComplete = mode === 'combo' && updatedCorrect >= COMBO_PASS_THRESHOLD
+      const isFinal = currentIndex === questions.length - 1 || isComboComplete
 
-      // Save to DB in background
+      // Save to DB in background (always — saves mid-quiz progress)
       fetch('/api/quiz/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,7 +104,6 @@ export default function QuizEngine({ mode, category, onExit }) {
         }),
       })
 
-      // Accumulate answer for results screen
       setAnswers(prev => [...prev, {
         question,
         userAnswer: answer,
@@ -113,8 +114,10 @@ export default function QuizEngine({ mode, category, onExit }) {
       setFeedback({
         isCorrect: result.correct,
         feedback: result.feedback,
+        spellingNote: result.spellingNote || null,
         officialAnswer: question.official_answer,
         userAnswer: answer,
+        isComboComplete,
       })
 
       setPhase('feedback')
@@ -125,6 +128,13 @@ export default function QuizEngine({ mode, category, onExit }) {
   }
 
   function handleNext() {
+    // Combo mode: end quiz once threshold is reached
+    const correctSoFar = answers.filter(a => a.isCorrect).length
+    if (mode === 'combo' && correctSoFar >= COMBO_PASS_THRESHOLD) {
+      setPhase('complete')
+      return
+    }
+
     const nextIndex = currentIndex + 1
     if (nextIndex >= questions.length) {
       setPhase('complete')
@@ -137,8 +147,9 @@ export default function QuizEngine({ mode, category, onExit }) {
   }
 
   const currentQuestion = questions[currentIndex]
-  const isLastQuestion = currentIndex === questions.length - 1
   const correctCount = answers.filter(a => a.isCorrect).length
+  const isLastQuestion = currentIndex === questions.length - 1
+    || (mode === 'combo' && correctCount + (feedback?.isCorrect ? 1 : 0) >= COMBO_PASS_THRESHOLD)
 
   // --- Render phases ---
 
@@ -152,19 +163,30 @@ export default function QuizEngine({ mode, category, onExit }) {
   }
 
   if (phase === 'error') {
+    const isMasteredEmpty = mode === 'mastered' && error?.includes('No mastered questions')
     return (
-      <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
-        <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-        <p className="font-medium text-red-700 mb-2">Something went wrong</p>
-        <p className="text-sm text-red-600 mb-5">{error}</p>
-        <div className="flex gap-3 justify-center">
-          <button onClick={startQuiz} className="bg-primary text-white px-5 py-2 rounded-xl hover:opacity-90">
-            Try Again
-          </button>
-          <button onClick={onExit} className="bg-muted hover:bg-accent px-5 py-2 rounded-xl">
-            Back to Topics
-          </button>
-        </div>
+      <div className={`${isMasteredEmpty ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'} border rounded-2xl p-8 text-center`}>
+        {isMasteredEmpty ? (
+          <>
+            <CheckCircle className="h-8 w-8 text-blue-400 mx-auto mb-3" />
+            <p className="font-medium text-blue-700 mb-2">No Passed Questions Yet</p>
+            <p className="text-sm text-blue-600 mb-5">
+              Answer at least 3 questions correctly to master them. Keep practicing!
+            </p>
+          </>
+        ) : (
+          <>
+            <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+            <p className="font-medium text-red-700 mb-2">Something went wrong</p>
+            <p className="text-sm text-red-600 mb-5">{error}</p>
+            <button onClick={startQuiz} className="bg-primary text-white px-5 py-2 rounded-xl hover:opacity-90 mr-3">
+              Try Again
+            </button>
+          </>
+        )}
+        <button onClick={onExit} className="bg-muted hover:bg-accent px-5 py-2 rounded-xl">
+          Back to Topics
+        </button>
       </div>
     )
   }
@@ -173,7 +195,7 @@ export default function QuizEngine({ mode, category, onExit }) {
     return (
       <QuizResults
         correct={correctCount}
-        total={questions.length}
+        total={answers.length}
         answers={answers}
         mode={mode}
         onRetry={startQuiz}
@@ -184,18 +206,28 @@ export default function QuizEngine({ mode, category, onExit }) {
 
   return (
     <div className="space-y-4">
-      {/* Mode badge */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onExit}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Back to Topics
-        </button>
-        <span className="text-muted-foreground">·</span>
-        <span className="text-xs bg-muted px-2 py-1 rounded-full capitalize font-medium">
-          {mode} mode
-        </span>
+      {/* Header: back link + mode badge + combo progress */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onExit}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Back to Topics
+          </button>
+          <span className="text-muted-foreground">·</span>
+          <span className="text-xs bg-muted px-2 py-1 rounded-full font-medium">
+            {MODE_LABELS[mode] ?? mode}
+          </span>
+        </div>
+
+        {/* Combo progress tracker */}
+        {mode === 'combo' && (
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <span className="text-green-600">{correctCount}</span>
+            <span className="text-muted-foreground">/ {COMBO_PASS_THRESHOLD} correct needed</span>
+          </div>
+        )}
       </div>
 
       {phase === 'question' && currentQuestion && (
@@ -220,7 +252,6 @@ export default function QuizEngine({ mode, category, onExit }) {
 
       {phase === 'feedback' && feedback && (
         <div className="space-y-4">
-          {/* Keep question visible above feedback */}
           <div className="bg-white border border-border rounded-2xl p-6 opacity-60">
             <p className="text-lg font-medium">{currentQuestion?.question_text}</p>
           </div>
@@ -228,6 +259,7 @@ export default function QuizEngine({ mode, category, onExit }) {
           <QuizFeedback
             isCorrect={feedback.isCorrect}
             feedback={feedback.feedback}
+            spellingNote={feedback.spellingNote}
             officialAnswer={feedback.officialAnswer}
             userAnswer={feedback.userAnswer}
             onNext={handleNext}

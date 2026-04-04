@@ -11,6 +11,7 @@ import SpeechButton from './SpeechButton'
  *   feedback       {string}    - Claude's one-sentence feedback
  *   officialAnswer {string}
  *   userAnswer     {string}
+ *   spellingNote   {string|null} - optional spelling/pronunciation tip from Claude
  *   onNext         {() => void}
  *   isLastQuestion {boolean}
  */
@@ -19,6 +20,7 @@ export default function QuizFeedback({
   feedback,
   officialAnswer,
   userAnswer,
+  spellingNote,
   onNext,
   isLastQuestion,
 }) {
@@ -40,12 +42,23 @@ export default function QuizFeedback({
       </div>
 
       {/* Claude's feedback */}
-      <p className="text-base text-foreground mb-5">{feedback}</p>
+      <p className="text-base text-foreground mb-4">{feedback}</p>
+
+      {/* Spelling / pronunciation note */}
+      {spellingNote && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-start gap-2">
+          <span className="text-amber-500 text-sm mt-0.5">✏️</span>
+          <p className="text-sm text-amber-800">{spellingNote}</p>
+        </div>
+      )}
 
       {/* Your answer vs official */}
       <div className="space-y-3 mb-6">
         <div className="bg-white/70 rounded-xl p-4">
-          <div className="text-xs font-medium text-muted-foreground mb-1">Your answer</div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-xs font-medium text-muted-foreground">Your answer</div>
+            <SpeechButton text={userAnswer} size="sm" />
+          </div>
           <div className="text-sm">{userAnswer}</div>
         </div>
 

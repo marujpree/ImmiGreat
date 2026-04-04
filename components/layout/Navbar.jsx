@@ -168,11 +168,11 @@ export default function AppNavbar() {
                       <div className="text-sm truncate text-foreground">{user.email}</div>
                     </div>
                     <Link
-                      href="/dashboard"
+                      href="/account"
                       onClick={() => setUserMenuOpen(false)}
                       className="block px-4 py-2 text-sm hover:bg-muted transition-colors text-foreground"
                     >
-                      Dashboard
+                      Profile Settings
                     </Link>
                     <button
                       onClick={handleSignOut}
@@ -238,7 +238,23 @@ export default function AppNavbar() {
               </Link>
             )
           })}
-          {!user && (
+          {user ? (
+            <div className="pt-4 space-y-2" style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}>
+              <Link
+                href="/account"
+                onClick={() => setMenuOpen(false)}
+                className="block px-3 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+              >
+                Profile Settings
+              </Link>
+              <button
+                onClick={() => { handleSignOut(); setMenuOpen(false) }}
+                className="w-full text-left px-3 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white rounded-lg transition-colors"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
             <div className="pt-4 space-y-2" style={{ borderTop: '1px solid rgba(255,255,255,0.2)' }}>
               <Link
                 href="/login"
